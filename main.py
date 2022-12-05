@@ -142,13 +142,11 @@ def generate_game(dictionary, referees, teams, keyword="Spele", sub_dict_keyword
 
 with open('futbols0.json', 'r') as file:
     game_data = json.load(file)
-
     referees = generate_referees(game_data, sub_dict_keywords=keywords_referees)
     teams = generate_teams(game_data)
     game = generate_game(game_data, referees, teams)
 
-    # for team in game.teams:
-    #     print(team)
+
 
 
 # transaction_execution_commands = []
@@ -163,7 +161,6 @@ def execute_transactions(transaction_exection_commands):
     session = data_base_connection.session()
     for i in transaction_exection_commands:
         session.run(i)
-
 
 def delete_all():
     return "MATCH (n) DETACH DELETE n"
