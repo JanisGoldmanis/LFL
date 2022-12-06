@@ -146,13 +146,97 @@ with open('futbols0.json', 'r') as file:
     teams = generate_teams(game_data)
     game = generate_game(game_data, referees, teams)
 
+print(game)
+
+# Generating NEO4J data
+transaction_execution_commands = []
+
+
+def delete_all():
+    return "MATCH (n) DETACH DELETE n"
+
+
+neo4j_create_statement = delete_all()
+transaction_execution_commands.append(neo4j_create_statement)
+
+place = game.place
+spectators = game.spectators
+date = game.date
+referees = game.referees
+teams = game.teams
+team1 = teams[0].name
+team2 = teams[1].name
+
+neo4j_create_statement = "MERGE (g:GAME {place:'%s', date:'%s', spectators:%d}) \
+                          WITH g MERGE (t1:TEAM {name:'%s'}) \
+                          WITH g,t1 MERGE (t2:TEAM {name:'%s'})\
+                          WITH g,t1,t2 \
+                          MERGE (t1)-[:PLAYED_IN]->(g)\
+                          WITH g,t2\
+                          MERGE (t2)-[:PLAYED_IN]->(g)" \
+                         % (place, date, spectators, team1, team2)
+transaction_execution_commands.append(neo4j_create_statement)
+
+# for referee in referees:
+#     neo4j_create_statement =
+#
+#     transaction_execution_commands.append(neo4j_create_statement)
+for referee in referees:
+    name = referee.Name
+    surname = referee.Surname
+    neo4j_create_statement = "MERGE (r:REFEREE {name:'%s', surname:'%s'}) " \
+                             "WITH r MATCH (game:GAME) WHERE game.date = '%s' AND game.place = '%s' " \
+                             "MERGE (r)-[:REFEREEING]->(game) " \
+                             % (name, surname, date, place)
+
+    transaction_execution_commands.append(neo4j_create_statement)
 
 
 
-# transaction_execution_commands = []
+for team in teams:
+    team_name = team.name
+    for player in team.players:
+        nr = player.number
+        name = player.name
+        surname = player.surname
+        role = player.role
+        neo4j_create_statement = "MERGE (p:PLAYER {nr:%d, name:'%s', surname:'%s', role:'%s',team:'%s'}) " \
+                                 "WITH p MATCH (team:TEAM) WHERE team.name = '%s' " \
+                                 "WITH p,team " \
+                                 "MERGE (p)-[:PLAYS_FOR]->(team)" \
+                                 % (nr, name, surname, role, team_name, team_name)
+        transaction_execution_commands.append(neo4j_create_statement)
+    for goal in team.goals:
+        time = goal.time
+        # passers = ""S
+        # for passer in goal.passers:
+        #     passers += "," + passer
+        scorer = goal.scorer
+        type = goal.type
+        neo4j_create_statement = "MERGE (g:GOAL {time:'%s',scorer:%d,type:'%s',team:'%s'}) " \
+                                 "WITH g MATCH (p:PLAYER) WHERE g.scorer = p.nr AND g.team = p.team " \
+                                 "WITH g,p " \
+                                 "MERGE (p)-[:SCORED]->(g) " \
+                                 "WITH g MATCH (game:GAME) WHERE game.date = '%s' AND game.place = '%s' " \
+                                 "MERGE (g)-[:GOAL]-(game)" \
+                                 % (time, scorer, type, team_name, date, place)
+        transaction_execution_commands.append(neo4j_create_statement)
 
-# neo4j_create_statement = "create (t:Transaction {transaction_id:1001})"
-# transaction_execution_commands.append(neo4j_create_statement)
+    for penalty in team.warnings:
+        time = penalty.Time
+        nr = penalty.Nr
+        neo4j_create_statement = "MERGE (w:PENALTY {time:'%s',nr:%d,team:'%s'}) " \
+                                 "WITH w MATCH (p:PLAYER) WHERE w.nr = p.nr AND w.team = p.team " \
+                                 "WITH w,p " \
+                                 "MERGE (p)-[:PENALTY]->(w) " \
+                                 "WITH w MATCH (game:GAME) WHERE game.date = '%s' AND game.place = '%s' " \
+                                 "MERGE (w)-[:PENALTY]-(game)" \
+                                 % (time, nr, team_name, date, place)
+        transaction_execution_commands.append(neo4j_create_statement)
+
+
+# neo4j_create_statement = "MATCH "
+
 # neo4j_create_statement = "create (t:Transaction {transaction_id:1005})"
 # transaction_execution_commands.append(neo4j_create_statement)
 
@@ -162,10 +246,5 @@ def execute_transactions(transaction_exection_commands):
     for i in transaction_exection_commands:
         session.run(i)
 
-def delete_all():
-    return "MATCH (n) DETACH DELETE n"
 
-# neo4j_create_statement = delete_all()
-# transaction_execution_commands.append(neo4j_create_statement)
-
-# execute_transactions(transaction_execution_commands)
+execute_transactions(transaction_execution_commands)
