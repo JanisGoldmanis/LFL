@@ -4,3 +4,6 @@ class Goals:
         self.passers = passers
         self.scorer = scorer
         self.type = type
+
+    def __str__(self):
+        return f"{self.time} scorer {self.scorer} passers: {self.passers} type: {self.type}"

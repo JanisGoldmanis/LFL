@@ -1,18 +1,125 @@
 {"Spele": {
- "Laiks": "2022/01/11",
- "Skatitaji": 6740,
+ "Laiks": "2022/02/22",
+ "Skatitaji": 6946,
  "Vieta": "Newlands Stadium",
  "T": [
   {
-   "Uzvards": "Antamo",
-   "Vards": "Dennis"
+   "Uzvards": "Honkanen",
+   "Vards": "Jukka"
   },
   {
-   "Uzvards": "Prompa",
-   "Vards": "Pedro"
+   "Uzvards": "Cariolato",
+   "Vards": "Gianluca"
   }
  ],
  "Komanda": [
+  {
+   "Nosaukums": "Skolmeistari",
+   "Speletaji": {"Speletajs": [
+    {
+     "Loma": "A",
+     "Nr": 9,
+     "Uzvards": "Debess",
+     "Vards": "Nils"
+    },
+    {
+     "Loma": "A",
+     "Nr": 21,
+     "Uzvards": "Zibens",
+     "Vards": "Vilhelms"
+    },
+    {
+     "Loma": "V",
+     "Nr": 22,
+     "Uzvards": "Rausis",
+     "Vards": "Vidmants"
+    },
+    {
+     "Loma": "A",
+     "Nr": 25,
+     "Uzvards": "Zibens",
+     "Vards": "Janka"
+    },
+    {
+     "Loma": "U",
+     "Nr": 28,
+     "Uzvards": "Palodze",
+     "Vards": "Rihards"
+    },
+    {
+     "Loma": "A",
+     "Nr": 30,
+     "Uzvards": "Paraugs",
+     "Vards": "Ciltvairis"
+    },
+    {
+     "Loma": "A",
+     "Nr": 33,
+     "Uzvards": "Antena",
+     "Vards": "Bo"
+    },
+    {
+     "Loma": "U",
+     "Nr": 34,
+     "Uzvards": "Grants",
+     "Vards": "Linards"
+    },
+    {
+     "Loma": "U",
+     "Nr": 36,
+     "Uzvards": "Rokturis",
+     "Vards": "Francis"
+    },
+    {
+     "Loma": "A",
+     "Nr": 39,
+     "Uzvards": "Svilpe",
+     "Vards": "Einars"
+    },
+    {
+     "Loma": "V",
+     "Nr": 41,
+     "Uzvards": "Zirnis",
+     "Vards": "Anderss"
+    },
+    {
+     "Loma": "A",
+     "Nr": 44,
+     "Uzvards": "Kompass",
+     "Vards": "Rolands"
+    },
+    {
+     "Loma": "U",
+     "Nr": 47,
+     "Uzvards": "Kabacis",
+     "Vards": "Kens"
+    }
+   ]},
+   "Pamatsastavs": {"Speletajs": [
+    {"Nr": 39},
+    {"Nr": 9},
+    {"Nr": 33},
+    {"Nr": 30},
+    {"Nr": 36},
+    {"Nr": 28},
+    {"Nr": 44},
+    {"Nr": 21},
+    {"Nr": 22},
+    {"Nr": 47}
+   ]},
+   "Varti": "",
+   "Mainas": "",
+   "Sodi": {"Sods": [
+    {
+     "Laiks": "13:47",
+     "Nr": 47
+    },
+    {
+     "Laiks": "23:06",
+     "Nr": 30
+    }
+   ]}
+  },
   {
    "Nosaukums": "Barcelona",
    "Speletaji": {"Speletajs": [
@@ -114,186 +221,39 @@
     }
    ]},
    "Pamatsastavs": {"Speletajs": [
-    {"Nr": 37},
-    {"Nr": 75},
     {"Nr": 73},
-    {"Nr": 16},
     {"Nr": 24},
+    {"Nr": 27},
     {"Nr": 96},
-    {"Nr": 55},
+    {"Nr": 16},
     {"Nr": 89},
-    {"Nr": 27}
+    {"Nr": 39},
+    {"Nr": 17}
    ]},
-   "Varti": {"VG": [
-    {
-     "Laiks": "06:09",
-     "P": [
-      {"Nr": 96},
-      {"Nr": 55}
-     ],
-     "Nr": 24,
-     "Sitiens": "N"
-    },
-    {
-     "Laiks": "11:07",
-     "P": [
-      {"Nr": 24},
-      {"Nr": 37},
-      {"Nr": 16}
-     ],
-     "Nr": 73,
-     "Sitiens": "N"
-    }
-   ]},
-   "Mainas": {"Maina": {
-    "Laiks": "23:34",
-    "Nr1": 16,
-    "Nr2": 64
+   "Varti": {"VG": {
+    "Laiks": "18:10",
+    "Nr": 96,
+    "Sitiens": "J"
    }},
+   "Mainas": "",
    "Sodi": {"Sods": [
     {
-     "Laiks": "41:40",
-     "Nr": 27
+     "Laiks": "09:20",
+     "Nr": 73
     },
     {
-     "Laiks": "56:24",
-     "Nr": 96
+     "Laiks": "29:45",
+     "Nr": 24
+    },
+    {
+     "Laiks": "37:19",
+     "Nr": 24
     }
    ]}
-  },
-  {
-   "Nosaukums": "Skolmeistari",
-   "Speletaji": {"Speletajs": [
-    {
-     "Loma": "A",
-     "Nr": 9,
-     "Uzvards": "Debess",
-     "Vards": "Nils"
-    },
-    {
-     "Loma": "A",
-     "Nr": 21,
-     "Uzvards": "Zibens",
-     "Vards": "Vilhelms"
-    },
-    {
-     "Loma": "V",
-     "Nr": 22,
-     "Uzvards": "Rausis",
-     "Vards": "Vidmants"
-    },
-    {
-     "Loma": "A",
-     "Nr": 25,
-     "Uzvards": "Zibens",
-     "Vards": "Janka"
-    },
-    {
-     "Loma": "U",
-     "Nr": 28,
-     "Uzvards": "Palodze",
-     "Vards": "Rihards"
-    },
-    {
-     "Loma": "A",
-     "Nr": 30,
-     "Uzvards": "Paraugs",
-     "Vards": "Ciltvairis"
-    },
-    {
-     "Loma": "A",
-     "Nr": 33,
-     "Uzvards": "Antena",
-     "Vards": "Bo"
-    },
-    {
-     "Loma": "U",
-     "Nr": 34,
-     "Uzvards": "Grants",
-     "Vards": "Linards"
-    },
-    {
-     "Loma": "U",
-     "Nr": 36,
-     "Uzvards": "Rokturis",
-     "Vards": "Francis"
-    },
-    {
-     "Loma": "A",
-     "Nr": 39,
-     "Uzvards": "Svilpe",
-     "Vards": "Einars"
-    },
-    {
-     "Loma": "V",
-     "Nr": 41,
-     "Uzvards": "Zirnis",
-     "Vards": "Anderss"
-    },
-    {
-     "Loma": "A",
-     "Nr": 44,
-     "Uzvards": "Kompass",
-     "Vards": "Rolands"
-    },
-    {
-     "Loma": "U",
-     "Nr": 47,
-     "Uzvards": "Kabacis",
-     "Vards": "Kens"
-    }
-   ]},
-   "Pamatsastavs": {"Speletajs": [
-    {"Nr": 9},
-    {"Nr": 36},
-    {"Nr": 41},
-    {"Nr": 39},
-    {"Nr": 25},
-    {"Nr": 34},
-    {"Nr": 30},
-    {"Nr": 28},
-    {"Nr": 47}
-   ]},
-   "Varti": {"VG": [
-    {
-     "Laiks": "20:04",
-     "P": [
-      {"Nr": 9},
-      {"Nr": 25}
-     ],
-     "Nr": 47,
-     "Sitiens": "N"
-    },
-    {
-     "Laiks": "35:38",
-     "P": [
-      {"Nr": 30},
-      {"Nr": 28},
-      {"Nr": 44}
-     ],
-     "Nr": 34,
-     "Sitiens": "N"
-    },
-    {
-     "Laiks": "63:21",
-     "P": {"Nr": 34},
-     "Nr": 39,
-     "Sitiens": "N"
-    }
-   ]},
-   "Mainas": {"Maina": {
-    "Laiks": "29:24",
-    "Nr1": 25,
-    "Nr2": 44
-   }},
-   "Sodi": {"Sods": {
-    "Laiks": "50:57",
-    "Nr": 36
-   }}
   }
  ],
  "VT": {
-  "Uzvards": "Rausis",
-  "Vards": "Rihards"
+  "Uzvards": "Prompa",
+  "Vards": "Pedro"
  }
 }}

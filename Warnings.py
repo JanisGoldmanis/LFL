@@ -4,4 +4,4 @@ class Warning:
         self.Nr = Nr
 
     def __str__(self):
-        return "Penalty time: "+self.Time+" Player: "+self.Nr
+        return f"Penalty time: {self.Time} Player: {self.Nr}"

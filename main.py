@@ -2,6 +2,8 @@ import json
 from neo4j import GraphDatabase
 
 import Game
+import Referee
+import HeadReferee
 import Team
 import Player
 import Referee
@@ -16,70 +18,103 @@ keywords_teams = ["Nosaukums"]
 keywords_player = ["Vards", "Uzvards", "Loma", "Nr"]
 
 
-def load_substitutions(dictionary, keyword="Mainas", sub_keyword="Maina", sub_dict_keywords=["Laiks", "Nr1", "Nr2"],
-                       team=Team.Team(), debug=False):
+def load_substitutions(dictionary, team, extended=False):
+    """
+    :param dictionary: Full JSON dictionary
+    :param team: Team class object
+    :param extended: Boolean for debug
+    :return: None. Modifies team object substitutions within method
+    At the end, "Mainas" is removed from dictionary
+    """
+    # No substitutions in json
+    if len(dictionary["Mainas"]) == 0:
+        if extended:
+            print('No substitutions')
+        dictionary.pop("Mainas")
+        return
+
     substitutions = []
-    local_dict = dictionary[keyword]
-    number_of_substitutions = len(local_dict)
-    if debug:
-        print("Number of substitutions in protocol:", number_of_substitutions)
-    if number_of_substitutions == 0:
-        print("No Substitutions")
-    elif number_of_substitutions == 1:
-        if debug:
-            print(local_dict[sub_keyword])
-        local_dict = local_dict[sub_keyword]
-        sub = Substitution.Substitution(local_dict[sub_dict_keywords[0]], local_dict[sub_dict_keywords[1]],
-                                        local_dict[sub_dict_keywords[2]])
-        if debug:
-            print(sub)
-        substitutions.append(sub)
+    # Multiple substitutions
+    if isinstance(dictionary["Mainas"]["Maina"], list):
+        for sub in dictionary["Mainas"]["Maina"]:
+            substitution = Substitution.Substitution(sub["Laiks"], sub["Nr1"], sub["Nr2"])
+            substitutions.append(substitution)
+    # Single substitution
     else:
-        print("Parse multiple substitutions!")
+        sub = dictionary["Mainas"]["Maina"]
+        substitution = Substitution.Substitution(sub["Laiks"], sub["Nr1"], sub["Nr2"])
+        substitutions.append(substitution)
+
     team.substitutions = substitutions
-    dictionary.pop(keyword)
+    if extended:
+        print(len(substitutions), 'total substitutions')
+    dictionary.pop("Mainas")
+    pass
 
 
-def load_warnings(dictionary, keyword="Sodi", sub_keyword="Sods", sub_dict_keywords=["Laiks", "Nr"], team=Team.Team(),
-                  debug=False):
+def load_warnings(dictionary, team, extended=False):
+    # No warnings in json
+    if len(dictionary["Sodi"]) == 0:
+        if extended:
+            print('No warnings')
+        dictionary.pop("Sodi")
+        return
+
     warnings = []
-    local_dict = dictionary[keyword][sub_keyword]
-    if debug:
-        print("Warnings:", local_dict, "Type:", type(local_dict))
-    if isinstance(local_dict, dict):
-        warning = Warnings.Warning(local_dict[sub_dict_keywords[0]], local_dict[sub_dict_keywords[1]])
-        warnings.append(warning)
-    if isinstance(local_dict, list):
-        for warning_dict in local_dict:
-            warning = Warnings.Warning(warning_dict[sub_dict_keywords[0]], warning_dict[sub_dict_keywords[1]])
-            warnings.append(warning)
+    # Multiple warnings
+    if isinstance(dictionary["Sodi"]["Sods"], list):
+        for warning in dictionary["Sodi"]["Sods"]:
+            w = Warnings.Warning(warning["Laiks"], warning["Nr"])
+            warnings.append(w)
+    # Single warning
+    else:
+        warning = dictionary["Sodi"]["Sods"]
+        w = Warnings.Warning(warning["Laiks"], warning["Nr"])
+        warnings.append(w)
+
     team.warnings = warnings
-    dictionary.pop(keyword)
+    if extended:
+        print(len(warnings), 'total warnings')
+    dictionary.pop("Sodi")
+    pass
 
 
-def generate_referees(dictionary, keyword="Spele", sub_keyword="T", sub_dict_keywords=["Uzvards", "Vards"]):
+def generate_referees(dictionary, extended=False):
     referees = []
-    for referee_dict in dictionary[keyword][sub_keyword]:
-        referees.append(Referee.Referee(referee_dict[sub_dict_keywords[0]], referee_dict[sub_dict_keywords[1]]))
+    for referee_dict in dictionary["Spele"]["T"]:
+        referees.append(Referee.Referee(referee_dict["Uzvards"], referee_dict["Vards"]))
+    if extended:
+        print('Loaded', len(referees), 'referees')
     return referees
 
 
-def generate_teams(dictionary, keyword="Spele", sub_keyword="Komanda", sub_dict_keywords=["Nosaukums"], debug=False):
+def generate_head_referees(dictionary, keyword="Spele", sub_keyword="VT", sub_dict_keywords=["Uzvards", "Vards"]):
+    print('Adding head referee')
+    referee_dict = dictionary[keyword][sub_keyword]
+    referee = HeadReferee.HeadReferee(referee_dict[sub_dict_keywords[0]], referee_dict[sub_dict_keywords[1]])
+    return referee
+
+
+def generate_teams(dictionary, keyword="Spele", sub_keyword="Komanda", sub_dict_keywords=["Nosaukums"], debug=False,
+                   extended=False):
     teams = []
     for team_dict in dictionary[keyword][sub_keyword]:
         if debug:
             print("Team name:", team_dict[sub_dict_keywords[0]])
         team = Team.Team(team_dict[sub_dict_keywords[0]])
         team_dict.pop(sub_dict_keywords[0])
+        print('Team', team.name)
         players = generate_players(team_dict)
+        print(len(players), 'players')
         team.players = players
         starters = generate_starters(team_dict)
+        print(len(starters), 'starters')
         team.starting = starters
         goals = generate_goals(team_dict)
+        print(len(goals), 'total goals')
         team.goals = goals
-
-        load_substitutions(team_dict, sub_dict_keywords=keywords_substitution, team=team, debug=False)
-        load_warnings(team_dict, sub_dict_keywords=keywords_warnings, team=team, debug=False)
+        load_substitutions(team_dict, team, extended=extended)
+        load_warnings(team_dict, team, extended=extended)
         teams.append(team)
     if debug:
         print("Team quantity from parsing:", len(teams))
@@ -119,34 +154,59 @@ def generate_goals(dictionary, keyword="Varti", subkeyword="VG", sub_dict_keywor
     nr = sub_dict_keywords[2]
     type = sub_dict_keywords[3]
     goals = []
-    for goal_dict in dictionary[keyword][subkeyword]:
-        goal = Goals.Goals(goal_dict[time], goal_dict[assists], goal_dict[nr], goal_dict[type])
+    print(dictionary[keyword])
+    print(len(dictionary[keyword]))
+    if isinstance(dictionary[keyword][subkeyword], list):
+        number_of_goals = len(dictionary[keyword][subkeyword])
+    else:
+        number_of_goals = len(dictionary[keyword])
+
+    if number_of_goals > 1:
+        for goal_dict in dictionary[keyword][subkeyword]:
+            try:
+                goal = Goals.Goals(goal_dict[time], goal_dict[assists], goal_dict[nr], goal_dict[type])
+            except KeyError:
+                goal = Goals.Goals(goal_dict[time], [], goal_dict[nr], goal_dict[type])
+            goals.append(goal)
+            print(goal)
+    if number_of_goals == 1:
+        goal_dict = dictionary[keyword][subkeyword]
+        try:
+            goal = Goals.Goals(goal_dict[time], goal_dict[assists], goal_dict[nr], goal_dict[type])
+        except KeyError:
+            goal = Goals.Goals(goal_dict[time], [], goal_dict[nr], goal_dict[type])
         goals.append(goal)
+        print(goal)
+
     dictionary.pop(keyword)
     return goals
 
 
-def generate_game(dictionary, referees, teams, keyword="Spele", sub_dict_keywords=["Laiks", "Skatitaji", "Vieta"]):
+def generate_game(dictionary, referees, teams, head_referee, keyword="Spele",
+                  sub_dict_keywords=["Laiks", "Skatitaji", "Vieta"]):
     date = sub_dict_keywords[0]
     spectators = sub_dict_keywords[1]
     place = sub_dict_keywords[2]
     game_dict = dictionary[keyword]
-    game = Game.Game(game_dict[date], game_dict[spectators], game_dict[place], referees, teams)
+    game = Game.Game(game_dict[date], game_dict[spectators], game_dict[place], referees, teams, head_referee)
     game_dict.pop(date)
     game_dict.pop(spectators)
     game_dict.pop(place)
     game_dict.pop("T")
+    game_dict.pop("VT")
     game_dict.pop("Komanda")
     return game
 
 
-with open('futbols0.json', 'r') as file:
-    game_data = json.load(file)
-    referees = generate_referees(game_data, sub_dict_keywords=keywords_referees)
-    teams = generate_teams(game_data)
-    game = generate_game(game_data, referees, teams)
+extended = False
 
-print(game)
+with open('futbols1.json', 'r') as file:
+    game_data = json.load(file)
+    head_referee = generate_head_referees(game_data, sub_dict_keywords=keywords_referees)
+    referees = generate_referees(game_data, sub_dict_keywords=keywords_referees)
+    teams = generate_teams(game_data, extended=extended)
+    game = generate_game(game_data, referees, teams, head_referee)
+    print('Leftover:', game_data)
 
 # Generating NEO4J data
 transaction_execution_commands = []
@@ -156,13 +216,14 @@ def delete_all():
     return "MATCH (n) DETACH DELETE n"
 
 
-neo4j_create_statement = delete_all()
-transaction_execution_commands.append(neo4j_create_statement)
+# neo4j_create_statement = delete_all()
+# transaction_execution_commands.append(neo4j_create_statement)
 
 place = game.place
 spectators = game.spectators
 date = game.date
 referees = game.referees
+head_referee = game.head_referee
 teams = game.teams
 team1 = teams[0].name
 team2 = teams[1].name
@@ -177,10 +238,6 @@ neo4j_create_statement = "MERGE (g:GAME {place:'%s', date:'%s', spectators:%d}) 
                          % (place, date, spectators, team1, team2)
 transaction_execution_commands.append(neo4j_create_statement)
 
-# for referee in referees:
-#     neo4j_create_statement =
-#
-#     transaction_execution_commands.append(neo4j_create_statement)
 for referee in referees:
     name = referee.Name
     surname = referee.Surname
@@ -188,10 +245,15 @@ for referee in referees:
                              "WITH r MATCH (game:GAME) WHERE game.date = '%s' AND game.place = '%s' " \
                              "MERGE (r)-[:REFEREEING]->(game) " \
                              % (name, surname, date, place)
-
     transaction_execution_commands.append(neo4j_create_statement)
 
-
+name = head_referee.Name
+surname = head_referee.Surname
+neo4j_create_statement = "MERGE (r:HEAD_REFEREE {name:'%s', surname:'%s'}) " \
+                         "WITH r MATCH (game:GAME) WHERE game.date = '%s' AND game.place = '%s' " \
+                         "MERGE (r)-[:HEAD_REFEREEING]->(game) " \
+                         % (name, surname, date, place)
+transaction_execution_commands.append(neo4j_create_statement)
 
 for team in teams:
     team_name = team.name
