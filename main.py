@@ -6,16 +6,11 @@ import Referee
 import HeadReferee
 import Team
 import Player
-import Referee
 import Goals
 import Substitution
 import Warnings
 
-keywords_substitution = ["Laiks", "Nr1", "Nr2"]
-keywords_warnings = ["Laiks", "Nr"]
-keywords_referees = ["Uzvards", "Vards"]
-keywords_teams = ["Nosaukums"]
-keywords_player = ["Vards", "Uzvards", "Loma", "Nr"]
+
 
 
 def load_substitutions(dictionary, team, extended=False):
@@ -88,124 +83,125 @@ def generate_referees(dictionary, extended=False):
     return referees
 
 
-def generate_head_referees(dictionary, keyword="Spele", sub_keyword="VT", sub_dict_keywords=["Uzvards", "Vards"]):
-    print('Adding head referee')
-    referee_dict = dictionary[keyword][sub_keyword]
-    referee = HeadReferee.HeadReferee(referee_dict[sub_dict_keywords[0]], referee_dict[sub_dict_keywords[1]])
+def generate_head_referees(dictionary, extended=False):
+    if extended:
+        print('Adding head referee')
+    referee_dict = dictionary["Spele"]["VT"]
+    referee = HeadReferee.HeadReferee(referee_dict["Uzvards"], referee_dict["Vards"])
     return referee
 
 
-def generate_teams(dictionary, keyword="Spele", sub_keyword="Komanda", sub_dict_keywords=["Nosaukums"], debug=False,
-                   extended=False):
+def generate_teams(dictionary, extended=False):
     teams = []
-    for team_dict in dictionary[keyword][sub_keyword]:
-        if debug:
-            print("Team name:", team_dict[sub_dict_keywords[0]])
-        team = Team.Team(team_dict[sub_dict_keywords[0]])
-        team_dict.pop(sub_dict_keywords[0])
-        print('Team', team.name)
-        players = generate_players(team_dict)
-        print(len(players), 'players')
+    for team_dict in dictionary["Spele"]["Komanda"]:
+        team = Team.Team(team_dict["Nosaukums"])
+        team_dict.pop("Nosaukums")
+        if extended:
+            print()
+            print('Team', team.name)
+
+        # Players
+        players = generate_players(team_dict, extended)
         team.players = players
-        starters = generate_starters(team_dict)
-        print(len(starters), 'starters')
+
+        # Starters
+        starters = generate_starters(team_dict, extended)
         team.starting = starters
-        goals = generate_goals(team_dict)
-        print(len(goals), 'total goals')
+
+        # Goals
+        goals = generate_goals(team_dict, extended)
         team.goals = goals
+
         load_substitutions(team_dict, team, extended=extended)
         load_warnings(team_dict, team, extended=extended)
+
         teams.append(team)
-    if debug:
-        print("Team quantity from parsing:", len(teams))
+
+    if extended:
+        print(len(teams), "teams loaded")
+
     return teams
 
 
-def generate_players(dictionary, keyword="Speletaji", sub_keyword="Speletajs",
-                     sub_dict_keywords=None, debug=False):
-    if sub_dict_keywords is None:
-        sub_dict_keywords = ["Vards", "Uzvards", "Loma", "Nr"]
+def generate_players(dictionary, extended=False):
     players = []
-    name = sub_dict_keywords[0]
-    surname = sub_dict_keywords[1]
-    role = sub_dict_keywords[2]
-    nr = sub_dict_keywords[3]
-    if debug:
-        print(dictionary[keyword][sub_keyword])
-    for player_dict in dictionary[keyword][sub_keyword]:
-        player = Player.Player(player_dict[name], player_dict[surname], player_dict[role], player_dict[nr])
+    local_dict = dictionary["Speletaji"]["Speletajs"]
+    for player_dict in local_dict:
+        player = Player.Player(player_dict["Vards"], player_dict["Uzvards"], player_dict["Loma"], player_dict["Nr"])
         players.append(player)
-    dictionary.pop(keyword)
+    dictionary.pop("Speletaji")
+    if extended:
+        print(len(players), "players added")
     return players
 
 
-def generate_starters(dictionary, keyword="Pamatsastavs", subkeyword="Speletajs", sub_dict_keywords=["Nr"]):
-    nr = sub_dict_keywords[0]
+def generate_starters(dictionary, extended=False):
     starters = []
-    for starter_dict in dictionary[keyword][subkeyword]:
-        starters.append(starter_dict[nr])
-    dictionary.pop(keyword)
+    for starter_dict in dictionary["Pamatsastavs"]["Speletajs"]:
+        starters.append(starter_dict["Nr"])
+    dictionary.pop("Pamatsastavs")
+    if extended:
+        print(len(starters), "starters added")
     return starters
 
 
-def generate_goals(dictionary, keyword="Varti", subkeyword="VG", sub_dict_keywords=["Laiks", "P", "Nr", "Sitiens"]):
-    time = sub_dict_keywords[0]
-    assists = sub_dict_keywords[1]
-    nr = sub_dict_keywords[2]
-    type = sub_dict_keywords[3]
+def generate_goals(dictionary, extended=False, debug=False):
+    # No goals in json
+    if len(dictionary["Varti"]) == 0:
+        if extended:
+            print('No goals')
+        dictionary.pop("Varti")
+        return []
+
     goals = []
-    print(dictionary[keyword])
-    print(len(dictionary[keyword]))
-    if isinstance(dictionary[keyword][subkeyword], list):
-        number_of_goals = len(dictionary[keyword][subkeyword])
-    else:
-        number_of_goals = len(dictionary[keyword])
-
-    if number_of_goals > 1:
-        for goal_dict in dictionary[keyword][subkeyword]:
+    # Multiple goals
+    if isinstance(dictionary["Varti"]["VG"], list):
+        for g in dictionary["Varti"]["VG"]:
             try:
-                goal = Goals.Goals(goal_dict[time], goal_dict[assists], goal_dict[nr], goal_dict[type])
+                goal = Goals.Goals(g["Laiks"], g["P"], g["Nr"], g["Sitiens"])
             except KeyError:
-                goal = Goals.Goals(goal_dict[time], [], goal_dict[nr], goal_dict[type])
+                goal = Goals.Goals(g["Laiks"], [], g["Nr"], g["Sitiens"])
             goals.append(goal)
-            print(goal)
-    if number_of_goals == 1:
-        goal_dict = dictionary[keyword][subkeyword]
+    # Single goal
+    else:
+        g = dictionary["Varti"]["VG"]
         try:
-            goal = Goals.Goals(goal_dict[time], goal_dict[assists], goal_dict[nr], goal_dict[type])
+            goal = Goals.Goals(g["Laiks"], g["P"], g["Nr"], g["Sitiens"])
         except KeyError:
-            goal = Goals.Goals(goal_dict[time], [], goal_dict[nr], goal_dict[type])
+            goal = Goals.Goals(g["Laiks"], [], g["Nr"], g["Sitiens"])
         goals.append(goal)
-        print(goal)
 
-    dictionary.pop(keyword)
+    if extended:
+        print(len(goals), 'total goals')
+    dictionary.pop("Varti")
     return goals
 
 
-def generate_game(dictionary, referees, teams, head_referee, keyword="Spele",
-                  sub_dict_keywords=["Laiks", "Skatitaji", "Vieta"]):
-    date = sub_dict_keywords[0]
-    spectators = sub_dict_keywords[1]
-    place = sub_dict_keywords[2]
-    game_dict = dictionary[keyword]
-    game = Game.Game(game_dict[date], game_dict[spectators], game_dict[place], referees, teams, head_referee)
-    game_dict.pop(date)
-    game_dict.pop(spectators)
-    game_dict.pop(place)
+def generate_game(dictionary, referees, teams, head_referee, extended=False):
+    game_dict = dictionary["Spele"]
+    game = Game.Game(game_dict["Laiks"], game_dict["Skatitaji"], game_dict["Vieta"], referees, teams, head_referee)
+    game_dict.pop("Laiks")
+    game_dict.pop("Skatitaji")
+    game_dict.pop("Vieta")
     game_dict.pop("T")
     game_dict.pop("VT")
     game_dict.pop("Komanda")
+    if extended:
+        print('Generating game', game.date, game.place)
     return game
-
 
 extended = False
 
-with open('futbols1.json', 'r') as file:
+filename = 'futbols2.json'
+with open(filename, 'r') as file:
+    if extended:
+        print()
+        print('Loading', filename)
     game_data = json.load(file)
-    head_referee = generate_head_referees(game_data, sub_dict_keywords=keywords_referees)
-    referees = generate_referees(game_data, sub_dict_keywords=keywords_referees)
+    head_referee = generate_head_referees(game_data, extended)
+    referees = generate_referees(game_data, extended)
     teams = generate_teams(game_data, extended=extended)
-    game = generate_game(game_data, referees, teams, head_referee)
+    game = generate_game(game_data, referees, teams, head_referee,extended)
     print('Leftover:', game_data)
 
 # Generating NEO4J data
