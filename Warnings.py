@@ -1,5 +1,5 @@
 class Warning:
-    def __init__(self, Time="", Nr=-1):
+    def __init__(self, Time='', Nr=-1):
         self.Time = Time
         self.Nr = Nr
 
