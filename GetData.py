@@ -109,7 +109,17 @@ def get_data():
                 Team1.loses += loss
                 Team1.loses_ot += ot_loss
 
+            while True:
+                flag = False
+                for index in range(len(list_of_teams) - 1):
+                    if list_of_teams[index].points < list_of_teams[index + 1].points:
+                        list_of_teams[index], list_of_teams[index + 1] = list_of_teams[index + 1], list_of_teams[index]
+                        flag = True
+                if flag == False:
+                    break
+
         print('|     Team      | Pts | GP| W |OTW|OTL| L | GF| GA|')
 
         for team in list_of_teams:
-            print(team, team.points, team.games_played)
+            print(f'|{team.name:<15}|{team.points:>5}|{team.games_played:>3}|{team.wins_normal:>3}|{team.wins_ot:>3}|'
+                  f'{team.loses_ot:>3}|{team.loses:>3}|{team.goals_for:>3}|{team.goals_against:>3}|')
